@@ -1,0 +1,8 @@
+BasedOnStyle: WebKit
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+Cpp11BracedListStyle: false
+ReferenceAlignment: Right
+PointerAlignment: Right
