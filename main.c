@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "query.h"
 #include "argparse.h"
 
 const char *SCHEMA_QUERY = "                                \
@@ -15,87 +16,6 @@ CREATE TABLE IF NOT EXISTS \"note\" (                       \
 
 static const char *DB_PATH = "./db.sqlite";
 
-typedef struct query_row_t {
-    char **col_values;
-    char **col_names;
-    size_t num_cols;
-} query_row;
-
-query_row *create_row(char **col_values, char **col_names, size_t num_cols)
-{
-    query_row *new_row = (query_row *)malloc(sizeof(query_row));
-    new_row->num_cols = num_cols;
-    new_row->col_values = (char **)malloc(num_cols * sizeof(char *));
-    new_row->col_names = (char **)malloc(num_cols * sizeof(char *));
-
-    for (int i = 0; i < num_cols; ++i) {
-        new_row->col_values[i] = (char *)malloc(strlen(col_values[i]) * sizeof(char));
-        strcpy(new_row->col_values[i], col_values[i]);
-        new_row->col_names[i] = (char *)malloc(strlen(col_names[i]) * sizeof(char));
-        strcpy(new_row->col_names[i], col_names[i]);
-    }
-    return new_row;
-}
-
-void free_row(query_row *row)
-{
-    for (int i = 0; i < row->num_cols; ++i) {
-        free(row->col_values[i]);
-        free(row->col_names[i]);
-    }
-    free(row->col_values);
-    free(row->col_names);
-    row->col_values = NULL;
-    row->col_names = NULL;
-    row->num_cols = 0;
-}
-
-typedef struct query_result_t {
-    query_row **rows;
-    size_t num_rows;
-    size_t capacity;
-} query_result;
-
-query_result *create_result()
-{
-    query_result *result = (query_result *)malloc(sizeof(query_result));
-    result->rows = NULL;
-    result->num_rows = 0;
-    result->capacity = 0;
-    return result;
-}
-
-void push_back(query_result *result, query_row *row)
-{
-    if (result->rows == NULL) {
-        result->rows = (query_row **)malloc(sizeof(query_row *));
-        result->capacity = 1;
-    } else if (result->num_rows == result->capacity) {
-        query_row **new_rows = (query_row **)realloc(
-            result->rows,
-            result->capacity * 2 * sizeof(query_row *));
-        if (new_rows == NULL) {
-            perror("Resize error for vector!");
-            exit(-1);
-        }
-        result->rows = new_rows;
-        result->capacity *= 2;
-    }
-    result->rows[result->num_rows] = row;
-    result->num_rows++;
-}
-
-void pop_back(query_result *result)
-{
-    if (result->num_rows > 0) {
-        result->num_rows--;
-    }
-}
-
-void free_result(query_result *result)
-{
-
-}
 
 int query_callback(void *data,
     int num_cols,
