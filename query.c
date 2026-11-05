@@ -1,6 +1,6 @@
 #include "query.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 query_row *create_row(char **col_values, char **col_names, size_t num_cols)
 {
@@ -30,7 +30,6 @@ void free_row(query_row *row)
     row->col_names = NULL;
     row->num_cols = 0;
 }
-
 
 query_result *create_result()
 {

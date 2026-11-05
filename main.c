@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "query.h"
 #include "argparse.h"
+#include "query.h"
 
 const char *SCHEMA_QUERY = "                                \
 CREATE TABLE IF NOT EXISTS \"note\" (                       \
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS \"note\" (                       \
 );";
 
 static const char *DB_PATH = "./db.sqlite";
-
 
 int query_callback(void *data,
     int num_cols,
@@ -141,7 +140,7 @@ int main(int argc, const char **argv)
     if (del_item != NULL) {
         char *end_ptr;
         int id = strtol(del_item, &end_ptr, 10);
-        if (end_ptr == del_item) {
+        if (*end_ptr != '\0') {
             printf("Invalid delete item id \"%s\"\n", del_item);
             exit(-1);
         }
