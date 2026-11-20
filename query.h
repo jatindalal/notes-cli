@@ -1,3 +1,6 @@
+#ifndef QUERY_H
+#define QUERY_H
+
 #include <stdlib.h>
 
 typedef struct query_row_t {
@@ -19,3 +22,5 @@ query_result *create_result();
 void push_back(query_result *result, query_row *row);
 void pop_back(query_result *result);
 void free_result(query_result *result);
+
+#endif // QUERY_H
