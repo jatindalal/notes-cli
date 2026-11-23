@@ -4,14 +4,16 @@
 sqlite3 *open_notes(const char *db_path)
 {
     sqlite3 *db_handle;
-    sqlite3_open_v2(db_path, &db_handle, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
-    return db_handle;
+    if (sqlite3_open_v2(db_path, &db_handle, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)
+            == SQLITE_OK) {
+        return db_handle;
+    }
+    return NULL;
 }
 
 bool close_notes(sqlite3 *db_handle)
 {
     if (sqlite3_close_v2(db_handle) == SQLITE_OK) {
-        db_handle = NULL;
         return true;
     }
     return false;
@@ -39,14 +41,11 @@ bool validate_schema(sqlite3 *db_handle)
 
 bool add_note(sqlite3 *db_handle, const char *note_text)
 {
-    // TODO: length provided in snprintf is not optimal
-    const char *insert_query_format_str = "INSERT INTO note (text) VALUES(\"%s\")";
-    char *error_msg;
-    char query_buffer[10240];
-    snprintf(query_buffer, strlen(insert_query_format_str) + strlen(note_text),
-        insert_query_format_str, note_text);
-    return sqlite3_exec(db_handle, query_buffer, _query_callback, NULL, &error_msg)
-        == SQLITE_OK;
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db_handle, "INSERT INTO note (text) VALUES(?)", -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, note_text, -1, SQLITE_STATIC);
+    sqlite3_step(stmt);
+    return sqlite3_finalize(stmt) == SQLITE_OK;
 }
 
 bool delete_note(sqlite3 *db_handle, int note_id)

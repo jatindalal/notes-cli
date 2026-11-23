@@ -40,7 +40,7 @@ query_result *create_result()
     return result;
 }
 
-void push_back(query_result *result, query_row *row)
+bool push_back(query_result *result, query_row *row)
 {
     if (result->rows == NULL) {
         result->rows = (query_row **)malloc(sizeof(query_row *));
@@ -50,14 +50,14 @@ void push_back(query_result *result, query_row *row)
             result->rows,
             result->capacity * 2 * sizeof(query_row *));
         if (new_rows == NULL) {
-            perror("Resize error for vector!");
-            exit(-1);
+            return false;
         }
         result->rows = new_rows;
         result->capacity *= 2;
     }
     result->rows[result->num_rows] = row;
     result->num_rows++;
+    return true;
 }
 
 void pop_back(query_result *result)

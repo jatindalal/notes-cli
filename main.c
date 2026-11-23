@@ -45,7 +45,10 @@ int main(int argc, const char **argv)
         perror("Couldn't open database!\n");
         exit(-1);
     }
-    validate_schema(db_handle);
+    if (!validate_schema(db_handle)) {
+        perror("Couldn't create database schema, failure on validation!");
+        exit(-1);
+    }
 
     if (add_item != NULL) {
         add_note(db_handle, add_item);
