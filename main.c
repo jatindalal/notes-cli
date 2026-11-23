@@ -60,7 +60,16 @@ int main(int argc, const char **argv)
         delete_note(db_handle, id);
     }
     if (list_item != 0) {
-        list_notes(db_handle);
+        query_result *result = list_notes(db_handle);
+        for (int i = 0; i < result->num_rows; ++i) {
+            for (int j = 0; j < result->rows[i]->num_cols; ++j) {
+                printf("%s: %s, ",
+                    result->rows[i]->col_names[j],
+                    result->rows[i]->col_values[j]);
+            }
+            printf("\n");
+        }
+        free_result(result);
     }
     return 0;
 }

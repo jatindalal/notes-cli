@@ -10,9 +10,11 @@ query_row *create_row(char **col_values, char **col_names, size_t num_cols)
     new_row->col_names = (char **)malloc(num_cols * sizeof(char *));
 
     for (int i = 0; i < num_cols; ++i) {
-        new_row->col_values[i] = (char *)malloc(strlen(col_values[i]) * sizeof(char));
+        // creating a new buffer to have copy of an existing string needs to take in account
+        // the space for a null character
+        new_row->col_values[i] = (char *)malloc((strlen(col_values[i]) + 1) * sizeof(char));
         strcpy(new_row->col_values[i], col_values[i]);
-        new_row->col_names[i] = (char *)malloc(strlen(col_names[i]) * sizeof(char));
+        new_row->col_names[i] = (char *)malloc((strlen(col_names[i]) + 1) * sizeof(char));
         strcpy(new_row->col_names[i], col_names[i]);
     }
     return new_row;
@@ -26,9 +28,7 @@ void free_row(query_row *row)
     }
     free(row->col_values);
     free(row->col_names);
-    row->col_values = NULL;
-    row->col_names = NULL;
-    row->num_cols = 0;
+    free(row);
 }
 
 query_result *create_result()
@@ -69,8 +69,9 @@ void pop_back(query_result *result)
 
 void free_result(query_result *result)
 {
+    for (int i = 0; i < result->num_rows; ++i) {
+        free_row(result->rows[i]);
+    }
     free(result->rows);
-    result->rows = NULL;
-    result->num_rows = 0;
-    result->capacity = 0;
+    free(result);
 }
