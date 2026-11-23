@@ -34,17 +34,25 @@ int _query_callback(void *data,
 
 bool validate_schema(sqlite3 *db_handle)
 {
-    char *error_msg;
     return sqlite3_exec(db_handle, SCHEMA_QUERY,
-                        _query_callback, NULL, &error_msg) == SQLITE_OK;
+                        _query_callback, NULL, NULL) == SQLITE_OK;
 }
 
 bool add_note(sqlite3 *db_handle, const char *note_text)
 {
-    sqlite3_stmt *stmt;
-    sqlite3_prepare_v2(db_handle, "INSERT INTO note (text) VALUES(?)", -1, &stmt, NULL);
-    sqlite3_bind_text(stmt, 1, note_text, -1, SQLITE_STATIC);
-    sqlite3_step(stmt);
+    sqlite3_stmt *stmt = NULL;
+    if (sqlite3_prepare_v2(db_handle, "INSERT INTO note (text) VALUES(?)", -1, &stmt, NULL) != SQLITE_OK) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    if (sqlite3_bind_text(stmt, 1, note_text, -1, SQLITE_STATIC) != SQLITE_OK) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        sqlite3_finalize(stmt);
+        return false;
+    }
     return sqlite3_finalize(stmt) == SQLITE_OK;
 }
 
@@ -54,18 +62,16 @@ bool delete_note(sqlite3 *db_handle, int note_id)
     // TODO: delete silently fails if note_id is not present
     const char *delete_query_format_str = "DELETE from note where id = \"%d\"";
     char query_buffer[40];
-    char *error_msg;
     snprintf(query_buffer, 40, delete_query_format_str, note_id);
-    return sqlite3_exec(db_handle, query_buffer, _query_callback, NULL, &error_msg)
+    return sqlite3_exec(db_handle, query_buffer, _query_callback, NULL, NULL)
         == SQLITE_OK;
 }
 
 query_result *list_notes(sqlite3 *db_handle)
 {
-    char *error_msg;
     const char *list_query = "SELECT * FROM note;";
     query_result *result = create_result();
-    if (sqlite3_exec(db_handle, list_query, _query_callback, result, &error_msg) != SQLITE_OK) {
+    if (sqlite3_exec(db_handle, list_query, _query_callback, result, NULL) != SQLITE_OK) {
         free_result(result);
         return NULL;
     }
