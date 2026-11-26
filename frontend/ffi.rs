@@ -105,10 +105,10 @@ impl Notes {
         }
     }
 
-    pub fn list(&self) -> Vec<Note> {
+    pub fn list(&self) -> Result<Vec<Note>, &'static str> {
         let query_result_handle = unsafe { list_notes(self.db_handle) };
-        let query_result = QueryResultGuard::create_result(query_result_handle).expect("This is not expected");
-        query_result.get()
+        let query_result = QueryResultGuard::create_result(query_result_handle)?;
+        Ok(query_result.get())
     }
 
     pub fn delete(&self, note_id: i32) -> bool {
