@@ -1,6 +1,7 @@
 mod ffi;
 
 use ffi::Notes;
+use gpui::div;
 
 fn main() -> Result<(), &'static str>
 {
